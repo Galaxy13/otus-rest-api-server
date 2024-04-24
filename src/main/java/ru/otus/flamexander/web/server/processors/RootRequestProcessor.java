@@ -6,17 +6,21 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-public class UnknownOperationRequestProcessor implements RequestProcessor {
+public class RootRequestProcessor implements RequestProcessor{
     @Override
     public void execute(HttpRequest httpRequest, OutputStream output) throws IOException {
         String response = """
-        HTTP/1.1 404 Not Found\r
+        HTTP/1.1 200 OK\r
         Content-Type: text/html\r
         \r
         <html>
         <body>
-               <h1>404 - Page Not Found</h1>
-               <p>The page you are looking for might have been removed, or is temporarily unavailable</p>
+        <h1>Welcome to Simple REST API Doc</h1>
+             <p>This API provides the following endpoints:</p>
+                 <ul>
+                     <li>/calc?a=value1?b=value2 - Adds two numbers</li>
+                     <li>/hello - Prints 'Hello world!'</li>
+                 </ul>
         </body></html>""";
         output.write(response.getBytes(StandardCharsets.UTF_8));
     }
