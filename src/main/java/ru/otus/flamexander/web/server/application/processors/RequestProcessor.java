@@ -1,4 +1,4 @@
-package ru.otus.flamexander.web.server.processors;
+package ru.otus.flamexander.web.server.application.processors;
 
 import ru.otus.flamexander.web.server.HttpRequest;
 

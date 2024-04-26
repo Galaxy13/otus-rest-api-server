@@ -1,10 +1,11 @@
-package ru.otus.flamexander.web.server.processors;
+package ru.otus.flamexander.web.server.application.processors;
 
 import ru.otus.flamexander.web.server.HttpRequest;
-import static ru.otus.flamexander.web.server.processors.ResponseProcessor.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
+
+import static ru.otus.flamexander.web.server.application.processors.ResponseProcessor.responseWrite;
 
 public class HelloWorldRequestProcessor implements RequestProcessor {
     @Override

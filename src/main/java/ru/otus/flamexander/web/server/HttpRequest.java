@@ -1,15 +1,20 @@
 package ru.otus.flamexander.web.server;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 public class HttpRequest {
     private final String rawRequest;
     private String uri;
     private HttpMethod method;
     private Map<String, String> parameters;
+    private JsonObject jsonData;
 
     public String getUri() {
         return uri;
@@ -21,7 +26,16 @@ public class HttpRequest {
 
     public HttpRequest(String rawRequest) throws BrokenHTTPRequestException {
         this.rawRequest = rawRequest;
-        this.parseRequestLine();
+        parseRequestLine();
+        parseJsonObject();
+    }
+
+    public String getRouteKey() {
+        return String.format("%s %s", method, uri);
+    }
+
+    public JsonObject getBody() {
+        return jsonData;
     }
 
     public void parseRequestLine() throws BrokenHTTPRequestException {
@@ -38,6 +52,14 @@ public class HttpRequest {
             String key = parameterMatcher.group(1);
             String value = parameterMatcher.group(2);
             parameters.put(key, value);
+        }
+    }
+
+    public void parseJsonObject() {
+        String[] requestParts = rawRequest.split("\r\n\r\n");
+        if (requestParts.length > 1) {
+            String jsonString = requestParts[1];
+            jsonData = JsonParser.parseString(jsonString).getAsJsonObject();
         }
     }
 
