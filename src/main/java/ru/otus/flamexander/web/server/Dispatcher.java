@@ -26,6 +26,6 @@ public class Dispatcher {
             unknownOperationRequestProcessor.execute(httpRequest, outputStream);
             return;
         }
-        router.get(httpRequest.getUri()).execute(httpRequest, outputStream);
+        router.get(httpRequest.getRouteKey()).execute(httpRequest, outputStream);
     }
 }
