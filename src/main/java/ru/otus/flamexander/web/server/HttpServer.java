@@ -42,6 +42,9 @@ public class HttpServer {
                             }
                         } catch (IOException e){
                             e.printStackTrace(System.out);
+                        } catch (StringIndexOutOfBoundsException e){
+                            System.out.println("Error buffer read");
+                            e.printStackTrace(System.out);
                         }
                     });
                 }

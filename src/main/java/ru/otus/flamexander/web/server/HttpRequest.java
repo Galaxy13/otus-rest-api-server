@@ -33,7 +33,7 @@ public class HttpRequest {
             throw new BrokenHTTPRequestException();
         }
         this.parameters = new HashMap<>();
-        Matcher parameterMatcher = Pattern.compile("\\?(\\w+)=(\\d+)").matcher(rawRequest);
+        Matcher parameterMatcher = Pattern.compile("[?|&](\\w+)=(\\w+)").matcher(rawRequest);
         while (parameterMatcher.find()){
             String key = parameterMatcher.group(1);
             String value = parameterMatcher.group(2);
