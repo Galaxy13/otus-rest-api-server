@@ -2,9 +2,11 @@ package ru.otus.flamexander.web.server;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HttpRequest {
-    private String rawRequest;
+    private final String rawRequest;
     private String uri;
     private HttpMethod method;
     private Map<String, String> parameters;
@@ -17,34 +19,36 @@ public class HttpRequest {
         return parameters.get(key);
     }
 
-    public HttpRequest(String rawRequest) {
+    public HttpRequest(String rawRequest) throws BrokenHTTPRequestException {
         this.rawRequest = rawRequest;
         this.parseRequestLine();
     }
 
-    public void parseRequestLine() {
-        int startIndex = rawRequest.indexOf(' ');
-        int endIndex = rawRequest.indexOf(' ', startIndex + 1);
-        this.uri = rawRequest.substring(startIndex + 1, endIndex);
-        this.method = HttpMethod.valueOf(rawRequest.substring(0, startIndex));
+    public void parseRequestLine() throws BrokenHTTPRequestException {
+        Matcher httpMatcher = Pattern.compile("(GET|PUT|POST|DELETE)\\s(/\\w*)").matcher(rawRequest);
+        if (httpMatcher.find()){
+            this.method = HttpMethod.valueOf(httpMatcher.group(1));
+            uri = httpMatcher.group(2);
+        } else {
+            throw new BrokenHTTPRequestException();
+        }
         this.parameters = new HashMap<>();
-        if (uri.contains("?")) {
-            String[] elements = uri.split("[?]");
-            this.uri = elements[0];
-            String[] keysValues = elements[1].split("&");
-            for (String o : keysValues) {
-                String[] keyValue = o.split("=");
-                this.parameters.put(keyValue[0], keyValue[1]);
-            }
+        Matcher parameterMatcher = Pattern.compile("[?|&](\\w+)=(\\w+)").matcher(rawRequest);
+        while (parameterMatcher.find()){
+            String key = parameterMatcher.group(1);
+            String value = parameterMatcher.group(2);
+            parameters.put(key, value);
         }
     }
 
-    public void info(boolean showRawRequest) {
-        if (showRawRequest) {
+    public void info(int debugDepth) {
+        if (debugDepth > 0) {
             System.out.println(rawRequest);
         }
-        System.out.println("URI: " + uri);
-        System.out.println("HTTP-method: " + method);
-        System.out.println("Parameters: " + parameters);
+        if (debugDepth > 1){
+            System.out.println("URI: " + uri);
+            System.out.println("HTTP-method: " + method);
+            System.out.println("Parameters: " + parameters + "\n");
+        }
     }
 }

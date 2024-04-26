@@ -6,6 +6,6 @@ public class Main {
     // - (*) В случае UnknownOperationRequestProcessor верните статус 404 со страницей NOT FOUND
 
     public static void main(String[] args) {
-        new HttpServer(8189).start();
+        new HttpServer(8189, 0).start();
     }
 }
