@@ -2,8 +2,6 @@ package ru.otus.flamexander.web.server.application.processors;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.otus.flamexander.web.server.HttpRequest;
 import ru.otus.flamexander.web.server.application.Item;
 import ru.otus.flamexander.web.server.application.Storage;
@@ -14,9 +12,7 @@ import java.io.OutputStream;
 import static ru.otus.flamexander.web.server.application.processors.ResponseProcessor.responseErrJson;
 import static ru.otus.flamexander.web.server.application.processors.ResponseProcessor.responseJson;
 
-public class CreateNewProductProcessor implements RequestProcessor {
-
-    private final Logger logger = LoggerFactory.getLogger(CreateNewProductProcessor.class);
+public class CreateNewProductProcessor extends Processor {
     @Override
     public void execute(HttpRequest httpRequest, OutputStream output) throws IOException {
         logger.trace("Execution of POST method to create new item");
