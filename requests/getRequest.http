@@ -1,0 +1,30 @@
+//200 Ok
+GET http://localhost:8189/
+Accept: text/html
+
+###
+//400 Bad Request (parameters 'a' and 'b' are required)
+GET http://localhost:8189/calc
+Accept: text/html
+
+###
+
+###
+// 200 OK
+GET http://localhost:8189/calc?a=5&b=7
+Accept: text/html
+
+###
+// 200 Ok
+GET http://localhost:8189/hello
+Accept: text/html
+
+###
+// 200 Ok
+GET http://localhost:8189/items
+Accept: application/json
+
+###
+// 404 Not Found
+GET http://localhost:8189/not_existing_method
+Accept: text/html
