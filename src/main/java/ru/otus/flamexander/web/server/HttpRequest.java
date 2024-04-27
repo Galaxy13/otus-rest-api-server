@@ -2,6 +2,9 @@ package ru.otus.flamexander.web.server;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +13,7 @@ import java.util.regex.Pattern;
 
 
 public class HttpRequest {
+    private final Logger logger = LoggerFactory.getLogger(HttpServer.class);
     private final String rawRequest;
     private String uri;
     private HttpMethod method;
@@ -20,32 +24,40 @@ public class HttpRequest {
         return uri;
     }
 
-    public String getParameter(String key) {
-        return parameters.get(key);
-    }
-
     public HttpRequest(String rawRequest) throws BrokenHTTPRequestException {
         this.rawRequest = rawRequest;
         parseRequestLine();
-        parseJsonObject();
+        if (method != HttpMethod.GET) {
+            parseJsonObject();
+        }
+        logger.debug("HTTP Request parsed successfully");
+    }
+
+    public String getParameter(String key) {
+        logger.trace(String.format("Parameter %s requested", key));
+        return parameters.get(key);
     }
 
     public String getRouteKey() {
+        logger.trace("Route key requested");
         return String.format("%s %s", method, uri);
     }
 
     public JsonObject getBody() {
+        logger.trace("Json body requested");
         return jsonData;
     }
 
     public void parseRequestLine() throws BrokenHTTPRequestException {
         Matcher httpMatcher = Pattern.compile("(GET|PUT|POST|DELETE)\\s(/\\w*)").matcher(rawRequest);
         if (httpMatcher.find()){
-            this.method = HttpMethod.valueOf(httpMatcher.group(1));
+            method = HttpMethod.valueOf(httpMatcher.group(1));
             uri = httpMatcher.group(2);
         } else {
+            logger.warn("Broken HTTP request passed");
             throw new BrokenHTTPRequestException();
         }
+        logger.debug(String.format("Successfully parsed 'method': %s and 'uri':%s from raw request", method, uri));
         this.parameters = new HashMap<>();
         Matcher parameterMatcher = Pattern.compile("[?|&](\\w+)=(\\w+)").matcher(rawRequest);
         while (parameterMatcher.find()){
@@ -55,22 +67,24 @@ public class HttpRequest {
         }
     }
 
-    public void parseJsonObject() {
+    public void parseJsonObject() throws BrokenHTTPRequestException {
+        logger.trace("Json object parsing started");
         String[] requestParts = rawRequest.split("\r\n\r\n");
         if (requestParts.length > 1) {
             String jsonString = requestParts[1];
-            jsonData = JsonParser.parseString(jsonString).getAsJsonObject();
+            try {
+                jsonData = JsonParser.parseString(jsonString).getAsJsonObject();
+            } catch (JsonSyntaxException e) {
+                logger.warn("Bad JSON provided with request");
+                throw new BrokenHTTPRequestException();
+            }
         }
     }
 
-    public void info(int debugDepth) {
-        if (debugDepth > 0) {
-            System.out.println(rawRequest);
-        }
-        if (debugDepth > 1){
-            System.out.println("URI: " + uri);
-            System.out.println("HTTP-method: " + method);
-            System.out.println("Parameters: " + parameters + "\n");
-        }
+    public void info() {
+        logger.trace(rawRequest);
+        logger.debug("URI: " + uri);
+        logger.debug("HTTP-method: " + method);
+        logger.debug("Parameters: " + parameters + "\n");
     }
 }

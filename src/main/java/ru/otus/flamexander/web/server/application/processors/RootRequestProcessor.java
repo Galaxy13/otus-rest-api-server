@@ -5,12 +5,13 @@ import ru.otus.flamexander.web.server.HttpRequest;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static ru.otus.flamexander.web.server.application.processors.ResponseProcessor.responseWrite;
+import static ru.otus.flamexander.web.server.application.processors.ResponseProcessor.responseHtml;
 
-public class RootRequestProcessor implements RequestProcessor{
+public class RootRequestProcessor extends Processor {
     @Override
     public void execute(HttpRequest httpRequest, OutputStream output) throws IOException {
-        responseWrite(200, "OK", """
+        super.logger.debug("Start page processor executed");
+        responseHtml(200, "OK", """
                 <h1>Welcome to Simple REST API Doc</h1>
                 
                 <p>This API provides the following endpoints:</p>
@@ -22,5 +23,6 @@ public class RootRequestProcessor implements RequestProcessor{
                 <li>/hello - Prints 'Hello world!'</li>
                 
                 </ul>""", output);
+        super.logger.debug("Start page processor successfully responded");
     }
 }

@@ -7,15 +7,17 @@ import ru.otus.flamexander.web.server.application.Storage;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-public class GetAllProductsProcessor implements RequestProcessor {
+import static ru.otus.flamexander.web.server.application.processors.ResponseProcessor.responseJson;
+
+public class GetAllProductsProcessor extends Processor {
     @Override
     public void execute(HttpRequest httpRequest, OutputStream output) throws IOException {
+        super.logger.trace("Get all products processor executed");
         List<Item> items = Storage.getItems();
         Gson gson = new Gson();
-        String result = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n" + gson.toJson(items);
-        output.write(result.getBytes(StandardCharsets.UTF_8));
+        responseJson(200, "OK", gson.toJson(items), output);
+        super.logger.debug("Get all products processor successfully responded");
     }
 }

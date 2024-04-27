@@ -5,10 +5,7 @@ import java.util.UUID;
 public class Item {
     private UUID id;
     private String title;
-    private int price;
-
-    public Item() {
-    }
+    private Integer price;
 
     public Item(String title, int price) {
         this.id = UUID.randomUUID();
@@ -32,7 +29,7 @@ public class Item {
         this.title = title;
     }
 
-    public int getPrice() {
+    public Integer getPrice() {
         return price;
     }
 

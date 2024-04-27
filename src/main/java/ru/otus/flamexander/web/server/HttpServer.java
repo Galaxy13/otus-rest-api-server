@@ -1,64 +1,62 @@
 package ru.otus.flamexander.web.server;
 
+import org.slf4j.LoggerFactory;
+import ru.otus.flamexander.web.server.application.Storage;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
 @SuppressWarnings("InfiniteLoopStatement")
 public class HttpServer {
     private final int port;
     private Dispatcher dispatcher;
-    private final int debugDepth;
+    private final org.slf4j.Logger logger = LoggerFactory.getLogger(HttpServer.class);
 
-    public HttpServer(int port, int debugDepth) {
+    public HttpServer(int port) {
         this.port = port;
-        this.debugDepth = (debugDepth > 2 || debugDepth < 0) ? 0: debugDepth;
     }
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port);
-             ExecutorService executorService = Executors.newFixedThreadPool(5);
-             InputStream stream = this.getClass().getClassLoader().getResourceAsStream("logging.properties")) {
-            LogManager.getLogManager().readConfiguration(stream);
-            Logger logger = Logger.getLogger(HttpServer.class.getName());
-            logger.info("Сервер запущен на порту: " + port);
+             ExecutorService executorService = Executors.newFixedThreadPool(5)) {
+            logger.info("Server started on port: " + port);
             this.dispatcher = new Dispatcher();
-            logger.config("Диспетчер проинициализирован");
+            logger.debug("Dispatcher initialized");
+            Storage.init();
+            logger.debug("Storage initialized");
             while (true){
                 Socket socket = serverSocket.accept();
-                logger.fine("Принято соединение с сокета " + socket.getLocalAddress().getHostAddress());
+                logger.info("Received socket connection from " + socket.getLocalAddress().getHostAddress());
                     executorService.execute(() -> {
                         try (socket) {
                             byte[] buffer = new byte[8192];
                             int n = socket.getInputStream().read(buffer);
                             String rawRequest = new String(buffer, 0, n);
-                            logger.finest("Cooбщение от сокета " + socket.getLocalAddress().getHostAddress() + " прочитано");
+                            logger.debug("Socket message " + socket.getLocalAddress().getHostAddress() + " read");
                             try {
                                 HttpRequest request = new HttpRequest(rawRequest);
-                                logger.finer("HTTP запрос обработан, создан объект HTTPRequest");
-                                request.info(debugDepth);
-                                logger.entering("Dispatcher", "execute");
+                                logger.debug("HTTP request handled, HTTPRequest object created");
+                                request.info();
                                 dispatcher.execute(request, socket.getOutputStream());
-                                logger.finer("Диспетчер обработал запрос с " + socket.getLocalAddress().getHostAddress());
+                                logger.trace("Dispatcher handles request from " + socket.getLocalAddress().getHostAddress());
+                                logger.info(String.format("HTTP %s request from %s handled", request.getRouteKey(), socket.getLocalAddress().getHostAddress()));
                             } catch (BrokenHTTPRequestException e){
-                                logger.warning(e.getMessage() + String.format(" from %s", socket
+                                logger.warn(e.getMessage() + String.format(" from %s", socket
                                         .getLocalAddress()
                                         .getHostAddress()));
                             }
                         } catch (IOException e){
-                            logger.warning(e.getMessage());
+                            logger.warn("Client socket error", e);
                         } catch (StringIndexOutOfBoundsException e){
-                            logger.warning("Buffer read error, String is out of bounds");
+                            logger.warn("Buffer read error, String is out of bounds", e);
                         }
                     });
                 }
         } catch (IOException e) {
-            Logger.getAnonymousLogger().severe(e.getMessage());
+            logger.error("Server internal error", e);
         }
     }
 }

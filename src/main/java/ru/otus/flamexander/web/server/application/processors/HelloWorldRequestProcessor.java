@@ -5,11 +5,13 @@ import ru.otus.flamexander.web.server.HttpRequest;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static ru.otus.flamexander.web.server.application.processors.ResponseProcessor.responseWrite;
+import static ru.otus.flamexander.web.server.application.processors.ResponseProcessor.responseHtml;
 
-public class HelloWorldRequestProcessor implements RequestProcessor {
+public class HelloWorldRequestProcessor extends Processor {
     @Override
     public void execute(HttpRequest httpRequest, OutputStream output) throws IOException {
-        responseWrite(200, "OK", "<h1>Hello World!!!</h1>", output);
+        super.logger.trace("Hello world processor executed");
+        responseHtml(200, "OK", "<h1>Hello World!!!</h1>", output);
+        super.logger.debug("Hello world processor successfully responded");
     }
 }
