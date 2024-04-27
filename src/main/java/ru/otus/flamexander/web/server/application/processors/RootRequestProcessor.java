@@ -18,9 +18,15 @@ public class RootRequestProcessor extends Processor {
                 
                 <ul>
                 
-                <li>/calc?a=value1?b=value2 - Adds two numbers</li>
+                <li>GET /calc?a=value1?b=value2 - Adds two numbers</li>
+                                
+                <li>GET /hello - Prints 'Hello world!'</li>
                 
-                <li>/hello - Prints 'Hello world!'</li>
+                <li>GET /items - Returns list of all items stored (JSON)</li>
+                                
+                <li>POST /items - creates new item, json parameters 'title' and 'price' required. Example: {"title": "apple", "price": 100}</li>
+                                
+                <li>PUT /items - updates existing item, json parameters 'uuid', 'title' or 'price' required. Example: {"uuid": 1325-da43-32ce-.., "title": "carrot"}</li>
                 
                 </ul>""", output);
         super.logger.debug("Start page processor successfully responded");
