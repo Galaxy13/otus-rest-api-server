@@ -1,7 +1,7 @@
-package ru.otus.flamexander.web.server;
+package com.otus.galaxy13.web.server;
 
 import org.slf4j.LoggerFactory;
-import ru.otus.flamexander.web.server.application.Storage;
+import com.otus.galaxy13.web.server.application.Storage;
 
 import java.io.IOException;
 import java.net.ServerSocket;

@@ -1,17 +1,17 @@
-package ru.otus.flamexander.web.server.application.processors;
+package com.otus.galaxy13.web.server.application.processors;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import ru.otus.flamexander.web.server.HttpRequest;
-import ru.otus.flamexander.web.server.application.Item;
-import ru.otus.flamexander.web.server.application.Storage;
+import com.otus.galaxy13.web.server.HttpRequest;
+import com.otus.galaxy13.web.server.application.Item;
+import com.otus.galaxy13.web.server.application.Storage;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.UUID;
 
-import static ru.otus.flamexander.web.server.application.processors.ResponseProcessor.responseErrJson;
-import static ru.otus.flamexander.web.server.application.processors.ResponseProcessor.responseJson;
+import static com.otus.galaxy13.web.server.application.processors.ResponseProcessor.responseErrJson;
+import static com.otus.galaxy13.web.server.application.processors.ResponseProcessor.responseJson;
 
 public class UpdateItemProcessor extends Processor {
     @Override

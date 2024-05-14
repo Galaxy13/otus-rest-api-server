@@ -1,8 +1,8 @@
-package ru.otus.flamexander.web.server;
+package com.otus.galaxy13.web.server;
 
+import com.otus.galaxy13.web.server.application.processors.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.otus.flamexander.web.server.application.processors.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,19 +10,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Dispatcher {
-    private final Map<String, RequestProcessor> router;
-    private final RequestProcessor unknownOperationRequestProcessor;
+    private final Map<String, Processor> router;
+    private final Processor unknownOperationRequestProcessor;
     private final Logger logger = LoggerFactory.getLogger(Dispatcher.class);
 
     public Dispatcher() {
         logger.trace("Dispatcher init started");
         this.router = new HashMap<>();
-        this.router.put("GET /calc", new CalculatorRequestProcessor());
-        this.router.put("GET /hello", new HelloWorldRequestProcessor());
         this.router.put("GET /", new RootRequestProcessor());
-        this.router.put("GET /items", new GetAllProductsProcessor());
+        this.router.put("GET /items", new GetProductsProcessor());
         this.router.put("POST /items", new CreateNewProductProcessor());
         this.router.put("PUT /items", new UpdateItemProcessor());
+        this.router.put("DELETE /items", new DeleteItemRequestProcessor());
         this.unknownOperationRequestProcessor = new UnknownOperationRequestProcessor();
     }
 

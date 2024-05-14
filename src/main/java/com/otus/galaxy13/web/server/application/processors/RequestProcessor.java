@@ -1,6 +1,6 @@
-package ru.otus.flamexander.web.server.application.processors;
+package com.otus.galaxy13.web.server.application.processors;
 
-import ru.otus.flamexander.web.server.HttpRequest;
+import com.otus.galaxy13.web.server.HttpRequest;
 
 import java.io.IOException;
 import java.io.OutputStream;

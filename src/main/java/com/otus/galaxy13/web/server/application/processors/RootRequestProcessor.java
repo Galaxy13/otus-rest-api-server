@@ -1,11 +1,11 @@
-package ru.otus.flamexander.web.server.application.processors;
+package com.otus.galaxy13.web.server.application.processors;
 
-import ru.otus.flamexander.web.server.HttpRequest;
+import com.otus.galaxy13.web.server.HttpRequest;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-import static ru.otus.flamexander.web.server.application.processors.ResponseProcessor.responseHtml;
+import static com.otus.galaxy13.web.server.application.processors.ResponseProcessor.responseHtml;
 
 public class RootRequestProcessor extends Processor {
     @Override

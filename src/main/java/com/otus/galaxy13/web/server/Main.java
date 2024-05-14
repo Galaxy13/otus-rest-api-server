@@ -1,4 +1,4 @@
-package ru.otus.flamexander.web.server;
+package com.otus.galaxy13.web.server;
 
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;

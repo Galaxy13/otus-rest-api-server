@@ -1,4 +1,4 @@
-package ru.otus.flamexander.web.server;
+package com.otus.galaxy13.web.server;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
