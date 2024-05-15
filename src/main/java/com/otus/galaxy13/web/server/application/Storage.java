@@ -1,30 +1,65 @@
 package com.otus.galaxy13.web.server.application;
 
+import com.otus.galaxy13.web.server.application.exceptions.NoDBConfigException;
+import com.otus.galaxy13.web.server.application.properties.DBConnectionProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.sql.*;
+import java.util.*;
 
 public class Storage {
-    private static final Logger logger = LoggerFactory.getLogger(Storage.class);
-    private static Map<UUID, Item> items;
+    private final Logger logger = LoggerFactory.getLogger(Storage.class);
+    private static DBConnectionProperties dbProperties;
 
-    public static void init() {
-        items = new HashMap<>();
-
-        for (int i = 0; i < 3; i++) {
-            Item item = new Item("item " + i, 100 + (int) (Math.random() * 1000));
-            items.put(item.getId(), item);
-        }
-        logger.trace("Default items have put in List");
+    public static void init() throws NoDBConfigException {
+        dbProperties = new DBConnectionProperties();
     }
 
-    public static List<Item> getItems() {
-        logger.trace("List of items requested");
-        return items.values().stream().toList();
+    /**
+     * Checks, if driver can be initialized and starts new connection
+     *
+     * @return new {@link Connection} to database
+     * @throws ClassNotFoundException if Postgres driver failed to initialize
+     * @throws SQLException           if SQL error occurs while opening connection
+     */
+    private static Connection createConnection() throws ClassNotFoundException, SQLException {
+        Class.forName("org.postgresql.Driver");
+        return DriverManager.getConnection(dbProperties.getJdbcURL(),
+                dbProperties.getJdbcUsername(),
+                dbProperties.getJdbcPassword());
+    }
+
+    private static String createGetAllItemsQuery(){
+        return """
+                select * from items""";
+    }
+
+    private static String createGetItemQuery(){
+        return """
+                select * from items where item_id = ?""";
+    }
+
+    private static String createNewItemQuery(){
+        return """
+                insert into items (uuid, title, price) values (?, ?, ?)""";
+    }
+
+    private static String createUpdateItemQuery(Map<String, String> params){
+        StringJoiner stringJoiner = new StringJoiner(",", "update items set ", "where item_id = ?");
+        params.forEach((key, value) -> stringJoiner.add(key + " = " + value));
+        return stringJoiner.toString();
+    }
+
+    public static List<Item> getItems() throws ClassNotFoundException, SQLException{
+        try(Connection connection = createConnection();
+        PreparedStatement preparedStatement = connection.prepareStatement(createGetAllItemsQuery())){
+            ResultSet rs = preparedStatement.executeQuery();
+            List<Item> items = new ArrayList<>();
+            while(rs.next()){
+                rs.getObject()
+            }
+        }
     }
 
     public static void save(Item item) {
@@ -54,5 +89,9 @@ public class Storage {
 
     public static Item getItem(UUID uuid) {
         return items.get(uuid);
+    }
+
+    public static Item getItem(int id){
+        return items.get(id);
     }
 }

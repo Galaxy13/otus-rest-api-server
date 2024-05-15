@@ -1,6 +1,8 @@
 package com.otus.galaxy13.web.server;
 
+import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
 import com.otus.galaxy13.web.server.application.processors.*;
+import com.otus.galaxy13.web.server.application.responses.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +10,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.BiConsumer;
 
 public class Dispatcher {
     private final Map<String, Processor> router;
@@ -30,9 +34,13 @@ public class Dispatcher {
         if (!router.containsKey(httpRequest.getRouteKey())) {
             logger.debug(String.format("Unknown HTTP method requested: %s", httpRequest.getUri()));
             unknownOperationRequestProcessor.execute(httpRequest, outputStream);
-            return;
         }
         logger.trace(String.format("Method found in 'router', proceed to execution: %s", httpRequest.getUri()));
-        router.get(httpRequest.getRouteKey()).execute(httpRequest, outputStream);
+        try {
+            Response response = router.get(httpRequest.getRouteKey()).execute(httpRequest, outputStream);
+            ResponseProcessor.sendResponse(response, outputStream, httpRequest.getRequestType());
+        } catch (HTTPError e){
+            ResponseProcessor.responseErr(e, outputStream, httpRequest.getRequestType());
+        }
     }
 }

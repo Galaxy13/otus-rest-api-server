@@ -1,0 +1,1 @@
+insert into items (uuid, title, price) values ('85884d50-9e78-45c0-ad50-4d83ec46a5d4', 'Apple', 10);

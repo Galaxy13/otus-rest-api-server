@@ -3,6 +3,8 @@ package com.otus.galaxy13.web.server.application.processors;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
+import com.otus.galaxy13.web.server.application.responses.Response;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,32 +28,47 @@ public class ResponseProcessor {
             %s
             """;
 
-    public static void responseHtml(int statusCode, String codeDescription, String body, OutputStream outputStream) throws IOException {
-        String response = String.format(responseHtmlTemplate, statusCode, codeDescription, body);
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+    public static void sendResponse(Response response, OutputStream outputStream, String type) throws IOException {
+        String responseFinal;
+        if (type.equals("html")){
+            responseFinal = String.format(responseHtmlTemplate, response.getStatusCode(), response.getCodeDescription(), response.getBody());
+        } else {
+            responseFinal= String.format(responseJsonTemplate, response.getStatusCode(), response.getCodeDescription(), response.getBody());
+        }
+        outputStream.write(responseFinal.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static void responseJson(int statusCode, String codeDescription, String jsonBody, OutputStream outputStream) throws IOException {
-        String response = String.format(responseJsonTemplate, statusCode, codeDescription, jsonBody);
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+    public static void responseErr(HTTPError httpError, OutputStream outputStream, String type) throws IOException {
+        String errBody;
+        if (type.equals("json")){
+            Gson gson = new Gson();
+            JsonObject responseJson = getJsonObject(httpError);
+            errBody = gson.toJson(responseJson);
+        } else {
+            String htmlBody = """
+                    <h1>%d - %s: %s</h1>""";
+            errBody = String.format(htmlBody, httpError.getStatusCode(), httpError.getTitle(), httpError.getDetail());
+        }
+        Response errResponse = new Response(httpError, errBody);
+        sendResponse(errResponse, outputStream, type);
     }
 
-    public static void responseErrJson(Gson gson, int statusCode, String pointer, String title, String detail, OutputStream outputStream) throws IOException {
+    private static JsonObject getJsonObject(HTTPError httpError) {
         JsonObject errJsonObject = new JsonObject();
-        errJsonObject.addProperty("status", String.valueOf(statusCode));
+        errJsonObject.addProperty("status", String.valueOf(httpError.getStatusCode()));
 
         JsonObject sourceJsonObject = new JsonObject();
-        sourceJsonObject.addProperty("pointer", pointer);
+        sourceJsonObject.addProperty("pointer", httpError.getPointer());
 
         errJsonObject.add("source", sourceJsonObject);
-        errJsonObject.addProperty("title", title);
-        errJsonObject.addProperty("detail", detail);
+        errJsonObject.addProperty("title", httpError.getTitle());
+        errJsonObject.addProperty("detail", httpError.getDetail());
 
         JsonArray errJsonList = new JsonArray();
         errJsonList.add(errJsonObject);
 
         JsonObject responseJson = new JsonObject();
         responseJson.add("errors", errJsonList);
-        responseJson(statusCode, title, gson.toJson(responseJson), outputStream);
+        return responseJson;
     }
 }

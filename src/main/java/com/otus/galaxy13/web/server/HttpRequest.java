@@ -19,6 +19,7 @@ public class HttpRequest {
     private HttpMethod method;
     private Map<String, String> parameters;
     private JsonObject jsonData;
+    private String requestType;
 
     public String getUri() {
         return uri;
@@ -48,6 +49,10 @@ public class HttpRequest {
         return jsonData;
     }
 
+    public String getRequestType() {
+        return requestType;
+    }
+
     public void parseRequestLine() throws BrokenHTTPRequestException {
         Matcher httpMatcher = Pattern.compile("(GET|PUT|POST|DELETE)\\s(/\\w*)").matcher(rawRequest);
         if (httpMatcher.find()){
@@ -58,6 +63,16 @@ public class HttpRequest {
             throw new BrokenHTTPRequestException();
         }
         logger.debug(String.format("Successfully parsed 'method': %s and 'uri':%s from raw request", method, uri));
+        if (rawRequest.contains("html")){
+            requestType = "html";
+            logger.trace("HTTP request type set to HTML");
+        } else if (rawRequest.contains("json")){
+            requestType = "json";
+            logger.trace("HTTP request type set to JSON");
+        } else {
+            logger.warn("HTTP request type not set or unsupported");
+            throw new BrokenHTTPRequestException();
+        }
         this.parameters = new HashMap<>();
         Matcher parameterMatcher = Pattern.compile("[?|&](\\w+)=(\\w+)").matcher(rawRequest);
         while (parameterMatcher.find()){
