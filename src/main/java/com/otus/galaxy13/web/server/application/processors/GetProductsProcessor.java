@@ -13,7 +13,7 @@ import java.util.List;
 
 public class GetProductsProcessor extends Processor {
     @Override
-    public Response execute(HttpRequest httpRequest, OutputStream output, boolean isHTML) throws IOException, HTTPError {
+    public Response execute(HttpRequest httpRequest, OutputStream output) throws HTTPError {
         super.logger.trace("Get all products processor executed");
         Gson gson = new Gson();
         Response response;

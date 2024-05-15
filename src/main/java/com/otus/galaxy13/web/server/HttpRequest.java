@@ -58,6 +58,13 @@ public class HttpRequest {
         if (httpMatcher.find()){
             method = HttpMethod.valueOf(httpMatcher.group(1));
             uri = httpMatcher.group(2);
+            String[] fileCheckArray = uri.split("\\.");
+            if (fileCheckArray.length >= 2
+                    && fileCheckArray[0].length() > 1
+                    && !fileCheckArray[fileCheckArray.length - 1].isEmpty()){
+                uri = "/file";
+                parameters.put("filename", uri.split("/")[1]);
+            }
         } else {
             logger.warn("Broken HTTP request passed");
             throw new BrokenHTTPRequestException();
