@@ -22,36 +22,55 @@ public class Router {
         RouterInstance instance;
         if (matcher.find()){
             String parameter = matcher.group(1);
-            requestType = pathUri.substring(0, pathUri.trim().lastIndexOf("/"));
-            if (parameter.equals("s")){
-                instance = new RouterInstance(requestType, processor, String.class);
-            } else if (parameter.equals("d")){
-                instance = new RouterInstance(requestType, processor, Integer.class);
+            pathUri = pathUri.substring(0, pathUri.trim().lastIndexOf("/"));
+            Class<?> parameterType;
+            if (parameter.equals("%s")){
+                parameterType = String.class;
+            } else if (parameter.equals("%d")){
+                parameterType = Integer.class;
             } else throw new WrongParameterException(parameter);
+            if (mainRouteMap.get(requestType).containsKey(pathUri)){
+                RouterInstance pathRouter = mainRouteMap.get(requestType).get(pathUri);
+                pathRouter.addParametrizedProcessor(parameterType, processor);
+                return;
+            } else {
+                instance = new RouterInstance(pathUri);
+                instance.addParametrizedProcessor(parameterType, processor);
+            }
         }
         else {
-            instance = new RouterInstance(requestType, processor);
+            instance = new RouterInstance(pathUri, processor);
         }
         mainRouteMap.get(requestType).put(pathUri, instance);
     }
 
-    public RouterInstance get(String pathUri, Processor requestProcessor){
-        return putRouterInstance("GET", pathUri, requestProcessor);
+    public void get(String pathUri, Processor requestProcessor) throws WrongParameterException{
+        putRouterInstance("GET", pathUri, requestProcessor);
     }
 
-    public RouterInstance post(String pathUri, Processor requestProcessor){
-        return putRouterInstance("POST", pathUri, requestProcessor);
+    public void post(String pathUri, Processor requestProcessor) throws WrongParameterException{
+        putRouterInstance("POST", pathUri, requestProcessor);
     }
 
-    public RouterInstance put(String pathUri, Processor requestProcessor){
-        return putRouterInstance("PUT", pathUri, requestProcessor);
+    public void put(String pathUri, Processor requestProcessor) throws WrongParameterException{
+        putRouterInstance("PUT", pathUri, requestProcessor);
     }
 
-    public RouterInstance delete(String pathUri, Processor requestProcessor){
-        return putRouterInstance("DELETE", pathUri, requestProcessor);
+    public void delete(String pathUri, Processor requestProcessor) throws WrongParameterException{
+        putRouterInstance("DELETE", pathUri, requestProcessor);
     }
 
     public Processor getProcessor(HttpRequest request) throws HTTPError {
-
+        Map<String, RouterInstance> instanceMap = mainRouteMap.get(request.getUri());
+        if (instanceMap.containsKey(request.getUri())){
+            return instanceMap.get(request.getUri()).getPathProcessor();
+        } else {
+            String strippedUri = request.getUri().substring(0, request.getUri().lastIndexOf("/"));
+            if (instanceMap.containsKey(strippedUri)){
+                return instanceMap.get(strippedUri).getParameterizedProcessor();
+            } else {
+                throw new HTTPError(404, request.getUri(), "Not Found", "Operaion not found, obsolete or not implemented");
+            }
+        }
     }
 }

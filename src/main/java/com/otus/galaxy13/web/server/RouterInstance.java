@@ -2,12 +2,18 @@ package com.otus.galaxy13.web.server;
 
 import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
 import com.otus.galaxy13.web.server.application.processors.Processor;
+import com.otus.galaxy13.web.server.application.processors.UknownOperationProcessor;
 
 public class RouterInstance {
-    Processor pathProcessor;
-    String routeKey;
-    Class<?> parametrizedLevelPathType;
-    Processor parameterizedLevelPathProcessor;
+    private Processor pathProcessor;
+    private final String routeKey;
+    private Class<?> parametrizedLevelPathType;
+    private Processor parameterizedLevelPathProcessor;
+
+    public RouterInstance(String currentLevelPath){
+        this.pathProcessor = new UknownOperationProcessor();
+        this.routeKey = currentLevelPath;
+    }
 
     public RouterInstance(String currentLevelPath, Processor pathProcessor) {
         this.pathProcessor = pathProcessor;
@@ -25,29 +31,17 @@ public class RouterInstance {
         return input.substring(indexOfLastSlash);
     }
 
-    public Processor getPathProcessor(String uri) throws HTTPError {
-        String[] uriParts = uri.split("/");
-        if (uriParts.length > 1){
-            if (routerChildPathMap.containsKey(uriParts[1])){
-                return routerChildPathMap.get(uriParts[1]).getPathProcessor(getChildPath(uri));
-            } else if (uriParts.length == 2) {
-                if (parametrizedLevelPathType != null){
-                    try {
-                        parametrizedLevelPathType.cast(uriParts[1]);
-                    } catch (ClassCastException e) {
-                        throw new HTTPError(404, uri, "Not Found", "URL not found");
-                    }
-                } else {
-                    throw new HTTPError(404, uri, "Not Found", "URL not found");
-                }
-            }
-        }
+
+    public void addParametrizedProcessor(Class<?> cls, Processor pathProcessor){
+        parametrizedLevelPathType = cls;
+        parameterizedLevelPathProcessor = pathProcessor;
+    }
+
+    public Processor getPathProcessor(){
         return pathProcessor;
     }
 
-
-    public void addNewParameterLevel(Class<?> cls, Processor pathProcessor){
-        parametrizedLevelPathType = cls;
-        parameterizedLevelPathProcessor = pathProcessor;
+    public Processor getParameterizedProcessor(){
+        return parameterizedLevelPathProcessor;
     }
 }
