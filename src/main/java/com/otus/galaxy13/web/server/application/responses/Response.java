@@ -6,6 +6,7 @@ public class Response {
     int statusCode;
     String codeDescription;
     String body;
+
     public Response(int statusCode, String codeDescription, String body) {
         this.statusCode = statusCode;
         this.codeDescription = codeDescription;

@@ -14,7 +14,7 @@ public class Dispatcher {
     private final Router router;
     private final Logger logger = LoggerFactory.getLogger(Dispatcher.class);
 
-    public Dispatcher() throws WrongParameterException {
+    public Dispatcher(){
         logger.trace("Dispatcher init started");
         this.router = new Router();
         router.get("/", new RootRequestProcessor());
@@ -29,8 +29,7 @@ public class Dispatcher {
     public void execute(HttpRequest httpRequest, OutputStream outputStream) throws IOException {
         logger.trace(String.format("Dispatcher execution requested with HTTP request: %s", httpRequest.getRouteKey()));
         try {
-            Processor requestProcessor = router.getProcessor(httpRequest);
-            Response response = requestProcessor.execute(httpRequest, outputStream);
+            Response response = router.parseRequest(httpRequest);
             ResponseProcessor.sendResponse(response, outputStream, httpRequest.getRequestType());
         } catch (HTTPError e){
             ResponseProcessor.responseErr(e, outputStream, httpRequest.getRequestType());

@@ -1,5 +1,7 @@
 package com.otus.galaxy13.web.server;
 
+import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
+import com.otus.galaxy13.web.server.application.processors.ResponseProcessor;
 import org.slf4j.LoggerFactory;
 import com.otus.galaxy13.web.server.application.Storage;
 

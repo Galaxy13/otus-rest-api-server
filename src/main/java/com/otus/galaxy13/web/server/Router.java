@@ -3,7 +3,9 @@ package com.otus.galaxy13.web.server;
 import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
 import com.otus.galaxy13.web.server.application.exceptions.WrongParameterException;
 import com.otus.galaxy13.web.server.application.processors.Processor;
+import com.otus.galaxy13.web.server.application.responses.Response;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -17,25 +19,19 @@ public class Router {
         put("DELETE", new HashMap<>());
     }};
 
-    public void putRouterInstance(String requestType, String pathUri, Processor processor) throws WrongParameterException{
-        Matcher matcher = Pattern.compile("(?<=/\\{)%s|%d(?=})").matcher(requestType);
+    public void putRouterInstance(String requestType, String pathUri, Processor processor){
+        Matcher matcher = Pattern.compile("(?<=/\\{)\\S+(?=}$)").matcher(requestType);
         RouterInstance instance;
         if (matcher.find()){
             String parameter = matcher.group(1);
             pathUri = pathUri.substring(0, pathUri.trim().lastIndexOf("/"));
-            Class<?> parameterType;
-            if (parameter.equals("%s")){
-                parameterType = String.class;
-            } else if (parameter.equals("%d")){
-                parameterType = Integer.class;
-            } else throw new WrongParameterException(parameter);
             if (mainRouteMap.get(requestType).containsKey(pathUri)){
                 RouterInstance pathRouter = mainRouteMap.get(requestType).get(pathUri);
-                pathRouter.addParametrizedProcessor(parameterType, processor);
+                pathRouter.addParametrizedProcessor(parameter, processor);
                 return;
             } else {
                 instance = new RouterInstance(pathUri);
-                instance.addParametrizedProcessor(parameterType, processor);
+                instance.addParametrizedProcessor(parameter, processor);
             }
         }
         else {
@@ -44,30 +40,33 @@ public class Router {
         mainRouteMap.get(requestType).put(pathUri, instance);
     }
 
-    public void get(String pathUri, Processor requestProcessor) throws WrongParameterException{
+    public void get(String pathUri, Processor requestProcessor){
         putRouterInstance("GET", pathUri, requestProcessor);
     }
 
-    public void post(String pathUri, Processor requestProcessor) throws WrongParameterException{
+    public void post(String pathUri, Processor requestProcessor){
         putRouterInstance("POST", pathUri, requestProcessor);
     }
 
-    public void put(String pathUri, Processor requestProcessor) throws WrongParameterException{
+    public void put(String pathUri, Processor requestProcessor){
         putRouterInstance("PUT", pathUri, requestProcessor);
     }
 
-    public void delete(String pathUri, Processor requestProcessor) throws WrongParameterException{
+    public void delete(String pathUri, Processor requestProcessor){
         putRouterInstance("DELETE", pathUri, requestProcessor);
     }
 
-    public Processor getProcessor(HttpRequest request) throws HTTPError {
+    public Response parseRequest(HttpRequest request) throws HTTPError {
         Map<String, RouterInstance> instanceMap = mainRouteMap.get(request.getUri());
         if (instanceMap.containsKey(request.getUri())){
-            return instanceMap.get(request.getUri()).getPathProcessor();
+            return instanceMap.get(request.getUri()).getPathProcessor().execute(request);
         } else {
-            String strippedUri = request.getUri().substring(0, request.getUri().lastIndexOf("/"));
+            int indexOfLastSlash = request.getUri().lastIndexOf("/");
+            String strippedUri = request.getUri().substring(0, indexOfLastSlash);
+            String parameter = request.getUri().substring(indexOfLastSlash + 1);
             if (instanceMap.containsKey(strippedUri)){
-                return instanceMap.get(strippedUri).getParameterizedProcessor();
+                RouterInstance routerInstance = instanceMap.get(strippedUri);
+                return routerInstance.getParameterizedProcessor().execute(request, parameter);
             } else {
                 throw new HTTPError(404, request.getUri(), "Not Found", "Operaion not found, obsolete or not implemented");
             }
