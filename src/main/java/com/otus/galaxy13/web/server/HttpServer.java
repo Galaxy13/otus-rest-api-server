@@ -1,7 +1,6 @@
 package com.otus.galaxy13.web.server;
 
-import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
-import com.otus.galaxy13.web.server.application.processors.ResponseProcessor;
+import com.otus.galaxy13.web.server.application.exceptions.NoDBConfigException;
 import org.slf4j.LoggerFactory;
 import com.otus.galaxy13.web.server.application.Storage;
 
@@ -57,8 +56,8 @@ public class HttpServer {
                         }
                     });
                 }
-        } catch (IOException e) {
-            logger.error("Server internal error", e);
+        } catch (IOException | NoDBConfigException e) {
+            logger.error("No DB Config. Server start halted ", e);
         }
     }
 }

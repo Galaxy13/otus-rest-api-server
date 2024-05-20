@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public class DeleteItemRequestProcessor extends Processor{
-    @Override
-    public void execute(HttpRequest httpRequest, OutputStream output) throws IOException {
-
-    }
+//    @Override
+//    public void execute(HttpRequest httpRequest, OutputStream output) throws IOException {
+//
+//    }
 }

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 public interface RequestProcessor {
-    Response execute(HttpRequest httpRequest) throws HTTPError;
+    Response execute(HttpRequest httpRequest) throws HTTPError, ClassNotFoundException;
 
-    Response execute(HttpRequest httpRequest, String parameter) throws HTTPError;
+    Response execute(HttpRequest httpRequest, String parameter) throws HTTPError, ClassNotFoundException;
 }

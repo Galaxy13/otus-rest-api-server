@@ -3,22 +3,31 @@ package com.otus.galaxy13.web.server.application;
 import java.util.UUID;
 
 public class Item {
-    private UUID id;
+    private UUID uuid;
     private String title;
     private Integer price;
 
     public Item(String title, int price) {
-        this.id = UUID.randomUUID();
+        this.uuid = UUID.randomUUID();
         this.title = title;
         this.price = price;
     }
 
-    public UUID getId() {
-        return id;
+    public Item(String title, int price, UUID uuid){
+        this.uuid = uuid;
+        this.title = title;
+        this.price = price;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public Item(){
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
     }
 
     public String getTitle() {
@@ -33,7 +42,7 @@ public class Item {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(Integer price) {
         this.price = price;
     }
 }

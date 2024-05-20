@@ -1,11 +1,9 @@
 package com.otus.galaxy13.web.server;
 
 import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
-import com.otus.galaxy13.web.server.application.exceptions.WrongParameterException;
 import com.otus.galaxy13.web.server.application.processors.Processor;
 import com.otus.galaxy13.web.server.application.responses.Response;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -20,11 +18,14 @@ public class Router {
     }};
 
     public void putRouterInstance(String requestType, String pathUri, Processor processor){
-        Matcher matcher = Pattern.compile("(?<=/\\{)\\S+(?=}$)").matcher(requestType);
+        Matcher matcher = Pattern.compile("(?<=/\\{)\\S+(?=}$)").matcher(pathUri);
         RouterInstance instance;
         if (matcher.find()){
-            String parameter = matcher.group(1);
+            String parameter = matcher.group(0);
             pathUri = pathUri.substring(0, pathUri.trim().lastIndexOf("/"));
+            if (pathUri.isEmpty()){
+                pathUri = "/";
+            }
             if (mainRouteMap.get(requestType).containsKey(pathUri)){
                 RouterInstance pathRouter = mainRouteMap.get(requestType).get(pathUri);
                 pathRouter.addParametrizedProcessor(parameter, processor);
@@ -56,8 +57,8 @@ public class Router {
         putRouterInstance("DELETE", pathUri, requestProcessor);
     }
 
-    public Response parseRequest(HttpRequest request) throws HTTPError {
-        Map<String, RouterInstance> instanceMap = mainRouteMap.get(request.getUri());
+    public Response parseRequest(HttpRequest request) throws HTTPError, ClassNotFoundException {
+        Map<String, RouterInstance> instanceMap = mainRouteMap.get(request.getMethod());
         if (instanceMap.containsKey(request.getUri())){
             return instanceMap.get(request.getUri()).getPathProcessor().execute(request);
         } else {
