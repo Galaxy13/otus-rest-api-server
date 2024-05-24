@@ -1,0 +1,17 @@
+// 201 Created
+POST http://localhost:8189/items
+Accept: application/json
+
+{
+"title": "new item 2",
+"price": 1000
+}
+
+###
+// 400 Bad Request ('title' and 'price' are required fields)
+POST http://localhost:8189/items
+Accept: application/json
+
+{
+"title": "new item 2"
+}

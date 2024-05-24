@@ -1,0 +1,8 @@
+// 200 OK
+DELETE http://localhost:8189/items/c2cddd8f-cb70-4891-8c8a-8e4df39f3145
+Accept: text/html
+
+###
+// 404 Not Found
+DELETE http://localhost:8189/items/c2cddd8f-cb70-4891-8c8a-8e4df39f3148
+Accept: application/json

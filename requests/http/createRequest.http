@@ -1,0 +1,4 @@
+POST http://localhost:8189/items
+Content-Type: text/html
+
+{"price":99, "title":"Test Title"}

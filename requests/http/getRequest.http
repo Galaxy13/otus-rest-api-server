@@ -1,0 +1,43 @@
+//200 Ok
+GET http://localhost:8189/
+Accept: text/html
+
+###
+// 404 Not Found
+GET http://localhost:8189/it/list/
+Accept: text/html
+
+###
+// 200 OK
+GET http://localhost:8189/items
+Accept: text/html
+
+###
+// 200 Ok
+GET http://localhost:8189/items/8edaf989-bc87-423b-8ca7-798cadd0a081
+Accept: text/html
+
+###
+// 404 Not Found
+GET http://localhost:8189/not_existing_method
+Accept: text/html
+
+###
+// 200 OK
+GET http://localhost:8189/test_file1.txt
+Accept: text/html
+
+###
+// 200 OK
+GET http://localhost:8189/test_file1.txt
+Accept: application/json
+
+###
+/// 404 Not Found
+GET http://localhost:8189/test_file2.txt
+Accept: application/json
+
+###
+// 200 OK
+GET http://localhost:8189/
+Accept: text/html

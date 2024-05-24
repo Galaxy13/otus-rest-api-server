@@ -1,0 +1,36 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Item Details</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 50%;
+            margin: 0 auto;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<h1>Item successfully updated</h1>
+<table>
+    <tr>
+        <th>ID</th>
+        <td>${item.uuid}</td>
+    </tr>
+    <tr>
+        <th>Title</th>
+        <td>${item.title}</td>
+    </tr>
+    <tr>
+        <th>Price</th>
+        <td>${item.price}</td>
+    </tr>
+</table>
+</body>

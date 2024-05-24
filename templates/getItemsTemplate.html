@@ -1,0 +1,23 @@
+<html lang="en">
+<head>
+    <title>Item List</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Item List</h1>
+    <table>
+        <tr><th>UUID</th><th>Title</th><th>Price</th></tr>
+        %%item.uuid, item.title, item.price%%
+    </table>
+</body>
+</html>
