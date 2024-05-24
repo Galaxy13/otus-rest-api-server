@@ -1,8 +1,9 @@
-package com.otus.galaxy13.web.server;
+package com.otus.galaxy13.web.server.http.routing;
 
-import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
 import com.otus.galaxy13.web.server.application.processors.Processor;
-import com.otus.galaxy13.web.server.application.responses.Response;
+import com.otus.galaxy13.web.server.http.ddo.HTTPRequest;
+import com.otus.galaxy13.web.server.http.ddo.Response;
+import com.otus.galaxy13.web.server.http.exceptions.HTTPError;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,22 +22,21 @@ public class Router {
         Matcher matcher = Pattern.compile("(?<=/\\{)\\S+(?=}$)").matcher(pathUri);
         RouterInstance instance;
         if (matcher.find()){
-            String parameter = matcher.group(0);
             pathUri = pathUri.substring(0, pathUri.trim().lastIndexOf("/"));
             if (pathUri.isEmpty()){
                 pathUri = "/";
             }
             if (mainRouteMap.get(requestType).containsKey(pathUri)){
                 RouterInstance pathRouter = mainRouteMap.get(requestType).get(pathUri);
-                pathRouter.addParametrizedProcessor(parameter, processor);
+                pathRouter.addParametrizedProcessor(processor);
                 return;
             } else {
-                instance = new RouterInstance(pathUri);
-                instance.addParametrizedProcessor(parameter, processor);
+                instance = new RouterInstance();
+                instance.addParametrizedProcessor(processor);
             }
         }
         else {
-            instance = new RouterInstance(pathUri, processor);
+            instance = new RouterInstance(processor);
         }
         mainRouteMap.get(requestType).put(pathUri, instance);
     }
@@ -57,13 +57,16 @@ public class Router {
         putRouterInstance("DELETE", pathUri, requestProcessor);
     }
 
-    public Response parseRequest(HttpRequest request) throws HTTPError, ClassNotFoundException {
+    public Response parseRequest(HTTPRequest request) throws HTTPError, ClassNotFoundException {
         Map<String, RouterInstance> instanceMap = mainRouteMap.get(request.getMethod());
         if (instanceMap.containsKey(request.getUri())){
             return instanceMap.get(request.getUri()).getPathProcessor().execute(request);
         } else {
             int indexOfLastSlash = request.getUri().lastIndexOf("/");
             String strippedUri = request.getUri().substring(0, indexOfLastSlash);
+            if (strippedUri.isEmpty()) {
+                strippedUri = "/";
+            }
             String parameter = request.getUri().substring(indexOfLastSlash + 1);
             if (instanceMap.containsKey(strippedUri)){
                 RouterInstance routerInstance = instanceMap.get(strippedUri);

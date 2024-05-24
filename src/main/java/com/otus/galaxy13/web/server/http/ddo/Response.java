@@ -1,6 +1,6 @@
-package com.otus.galaxy13.web.server.application.responses;
+package com.otus.galaxy13.web.server.http.ddo;
 
-import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
+import com.otus.galaxy13.web.server.http.exceptions.HTTPError;
 
 public class Response {
     int statusCode;

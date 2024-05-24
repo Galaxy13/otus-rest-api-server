@@ -1,8 +1,11 @@
-package com.otus.galaxy13.web.server;
+package com.otus.galaxy13.web.server.http;
 
-import com.otus.galaxy13.web.server.application.exceptions.NoDBConfigException;
-import org.slf4j.LoggerFactory;
 import com.otus.galaxy13.web.server.application.Storage;
+import com.otus.galaxy13.web.server.application.exceptions.NoDBConfigException;
+import com.otus.galaxy13.web.server.http.ddo.HTTPRequest;
+import com.otus.galaxy13.web.server.http.exceptions.BrokenHTTPRequestException;
+import com.otus.galaxy13.web.server.http.routing.Dispatcher;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -11,12 +14,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @SuppressWarnings("InfiniteLoopStatement")
-public class HttpServer {
+public class HTTPServer {
     private final int port;
     private Dispatcher dispatcher;
-    private final org.slf4j.Logger logger = LoggerFactory.getLogger(HttpServer.class);
+    private final org.slf4j.Logger logger = LoggerFactory.getLogger(HTTPServer.class);
 
-    public HttpServer(int port) {
+    public HTTPServer(int port) {
         this.port = port;
     }
 
@@ -38,7 +41,7 @@ public class HttpServer {
                             String rawRequest = new String(buffer, 0, n);
                             logger.debug("Socket message " + socket.getLocalAddress().getHostAddress() + " read");
                             try {
-                                HttpRequest request = new HttpRequest(rawRequest);
+                                HTTPRequest request = new HTTPRequest(rawRequest);
                                 logger.debug("HTTP request handled, HTTPRequest object created");
                                 request.info();
                                 dispatcher.execute(request, socket.getOutputStream());

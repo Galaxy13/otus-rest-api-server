@@ -1,39 +1,32 @@
 // 200 OK
-PUT http://localhost:8189/items
+PUT http://localhost:8189/items/9d00ac2b-5603-4667-854e-86202f0a0cb9
 Accept: application/json
 
 {
-    "id": "85471fbe-1dfc-4eac-a96b-df4ac85ede71",
-    "title": "changed item",
-    "price": 300
+    "title": "changed item1",
+    "price": 500
   }
 
 ###
-// 400 Bad Request (Nothing to update)
+// 404 Not found
 PUT http://localhost:8189/items
 Accept: application/json
 
 {
-"id": "7f862de8-fd9f-4160-95bb-df71e428017e"
+    "title": "changed item2"
 }
 
 ###
-// 400 Bad Request (No id)
-PUT http://localhost:8189/items
-Accept: application/json
+// 400 Bad Request (Nothing to update)
+PUT http://localhost:8189/items/9d00ac2b-5603-4667-854e-86202f0a0cb9
+Accept: text/html
 
 {}
 
 ###
 // 200 OK
-PUT http://localhost:8189/items
+PUT http://localhost:8189/items/9d00ac2b-5603-4667-854e-86202f0a0cb9?title=test_item&price=20
 Accept: application/json
-
-{
-  "id": "c5950b3a-cb8b-4671-9244-1a8fd0cda549",
-  "title": "new item 90",
-  "price": 10
-}
 
 ###
 // 200 OK

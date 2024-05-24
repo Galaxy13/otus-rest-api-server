@@ -1,73 +1,56 @@
 package com.otus.galaxy13.web.server.application.processors;
 
-import com.google.gson.Gson;
-import com.otus.galaxy13.web.server.HTMLParser;
-import com.otus.galaxy13.web.server.HttpRequest;
-import com.otus.galaxy13.web.server.application.Item;
 import com.otus.galaxy13.web.server.application.Storage;
-import com.otus.galaxy13.web.server.application.exceptions.HTMLParseException;
-import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
-import com.otus.galaxy13.web.server.application.responses.Response;
+import com.otus.galaxy13.web.server.application.ddo.Item;
+import com.otus.galaxy13.web.server.application.exceptions.ItemNotExists;
+import com.otus.galaxy13.web.server.http.HTTPResponse;
+import com.otus.galaxy13.web.server.http.ddo.HTTPRequest;
+import com.otus.galaxy13.web.server.http.ddo.Response;
+import com.otus.galaxy13.web.server.http.exceptions.HTTPError;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 
 public class GetProductsProcessor extends Processor {
     @Override
-    public Response execute(HttpRequest httpRequest, String parameter) throws HTTPError, ClassNotFoundException {
-        super.logger.trace("Get product by id processor executed");
-        Gson gson = new Gson();
+    public Response execute(HTTPRequest httpRequest, String parameter) throws HTTPError, ClassNotFoundException {
+        super.logger.trace("GET product by id processor executed...");
         UUID itemId;
         try {
             itemId = UUID.fromString(parameter);
-            logger.debug("Item id parameter retrieved from HTTP request");
+            logger.trace("Item id parameter retrieved from HTTP request");
         } catch (IllegalArgumentException e) {
             logger.debug("Provided parameter is not UUID (probably wrong URI)");
-            throw new HTTPError(401, httpRequest.getUri(), "Not an UUID", "Wrong ID path provided (not a int number)");
+            throw HTTPResponse.err404(httpRequest, "Wrong ID path provided (not a int number)");
         }
         Item item;
         try {
             item = Storage.getItem(itemId);
         } catch (ClassCastException | SQLException e){
             logger.debug("Error occurred while requesting item from database. Request handling halted");
-            throw new HTTPError(500, httpRequest.getUri(), "Internal Server Error", "Internal Server Error");
+            throw HTTPResponse.err500(httpRequest, "Internal Server Error");
+        } catch (ItemNotExists e) {
+            throw HTTPResponse.err404(httpRequest, "Item not exists");
         }
-        String body;
-        if (httpRequest.getRequestType().equals("html")){
-            try {
-                body = HTMLParser.parseHTML("getItemTemplate.html", item);
-            } catch (IOException | HTMLParseException e){
-                logger.warn("HTML parsing failed", e);
-                throw new HTTPError(500, httpRequest.getUri(), "Internal error", "Internal server error");
-            }
-        } else {
-            body = gson.toJson(item);
-        }
-        return new Response(200, "OK", body);
+        logger.trace("Item successfully received from database");
+        String body = bodyHandler(httpRequest, item, "getItemTemplate.html");
+        logger.trace("Response body of single item created");
+        return HTTPResponse.ok(body);
     }
 
     @Override
-    public Response execute(HttpRequest httpRequest) throws HTTPError, ClassNotFoundException {
-        super.logger.trace("Get all products processor executed");
-        Gson gson = new Gson();
+    public Response execute(HTTPRequest httpRequest) throws HTTPError, ClassNotFoundException {
+        super.logger.trace("GET all products processor executed...");
         List<Item> items;
         try {
             items = Storage.getItems();
         } catch (SQLException e){
-            throw new HTTPError(500, httpRequest.getUri(), "Internal Error", "Internal Server Error");
+            logger.debug("GET Processor catches SQL exception", e);
+            throw HTTPResponse.err500(httpRequest, "Internal Storage Error");
         }
-        String body;
-        if (httpRequest.getRequestType().equals("json")){
-            body = gson.toJson(items);
-        } else {
-            try {
-                body = HTMLParser.parseTableHTML("getItemsTemplate.html", items);
-            } catch (HTMLParseException | IOException e){
-                throw new HTTPError(500, httpRequest.getUri(), "Internal Error", "Internal Server Error");
-            }
-        }
-        return new Response(200, "OK", body);
+        String body = bodyHandler(httpRequest, items, "getItemsTemplate.html");
+        logger.trace("Response body of multiple items created");
+        return HTTPResponse.ok(body);
     }
 }

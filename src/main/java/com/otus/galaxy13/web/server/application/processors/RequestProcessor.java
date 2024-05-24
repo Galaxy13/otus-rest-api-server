@@ -1,14 +1,11 @@
 package com.otus.galaxy13.web.server.application.processors;
 
-import com.otus.galaxy13.web.server.HttpRequest;
-import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
-import com.otus.galaxy13.web.server.application.responses.Response;
-
-import java.io.IOException;
-import java.io.OutputStream;
+import com.otus.galaxy13.web.server.http.ddo.HTTPRequest;
+import com.otus.galaxy13.web.server.http.ddo.Response;
+import com.otus.galaxy13.web.server.http.exceptions.HTTPError;
 
 public interface RequestProcessor {
-    Response execute(HttpRequest httpRequest) throws HTTPError, ClassNotFoundException;
+    Response execute(HTTPRequest httpRequest) throws HTTPError, ClassNotFoundException;
 
-    Response execute(HttpRequest httpRequest, String parameter) throws HTTPError, ClassNotFoundException;
+    Response execute(HTTPRequest httpRequest, String parameter) throws HTTPError, ClassNotFoundException;
 }

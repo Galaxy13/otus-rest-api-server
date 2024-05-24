@@ -1,8 +1,10 @@
-package com.otus.galaxy13.web.server;
+package com.otus.galaxy13.web.server.http.routing;
 
-import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
 import com.otus.galaxy13.web.server.application.processors.*;
-import com.otus.galaxy13.web.server.application.responses.Response;
+import com.otus.galaxy13.web.server.http.ResponseProcessor;
+import com.otus.galaxy13.web.server.http.ddo.HTTPRequest;
+import com.otus.galaxy13.web.server.http.ddo.Response;
+import com.otus.galaxy13.web.server.http.exceptions.HTTPError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,7 @@ public class Dispatcher {
         router.delete("/items/{item_id}", new DeleteItemRequestProcessor());
     }
 
-    public void execute(HttpRequest httpRequest, OutputStream outputStream) throws IOException {
+    public void execute(HTTPRequest httpRequest, OutputStream outputStream) throws IOException {
         logger.trace(String.format("Dispatcher execution requested with HTTP request: %s", httpRequest.getRouteKey()));
         try {
             Response response = router.parseRequest(httpRequest);

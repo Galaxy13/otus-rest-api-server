@@ -1,10 +1,10 @@
-package com.otus.galaxy13.web.server.application.processors;
+package com.otus.galaxy13.web.server.http;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
-import com.otus.galaxy13.web.server.application.responses.Response;
+import com.otus.galaxy13.web.server.http.ddo.Response;
+import com.otus.galaxy13.web.server.http.exceptions.HTTPError;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -15,10 +15,8 @@ public class ResponseProcessor {
         HTTP/1.1 %d %s\r
         Content-Type: text/html\r
         \r
-        <html>
-        <body>
         %s
-        </body></html>""";
+                           \s""";
 
     private static final String responseJsonTemplate = """
             HTTP/1.1 %d %s
@@ -46,7 +44,11 @@ public class ResponseProcessor {
             errBody = gson.toJson(responseJson);
         } else {
             String htmlBody = """
-                    <h1>%d - %s: %s</h1>""";
+                    <html>
+                    <body>
+                    <h1>%d - %s: %s</h1>
+                    </body>
+                    </html>""";
             errBody = String.format(htmlBody, httpError.getStatusCode(), httpError.getTitle(), httpError.getDetail());
         }
         Response errResponse = new Response(httpError, errBody);

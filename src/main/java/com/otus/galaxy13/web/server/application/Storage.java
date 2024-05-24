@@ -1,16 +1,19 @@
 package com.otus.galaxy13.web.server.application;
 
+import com.otus.galaxy13.web.server.application.ddo.Item;
+import com.otus.galaxy13.web.server.application.exceptions.ItemNotExists;
 import com.otus.galaxy13.web.server.application.exceptions.NoDBConfigException;
 import com.otus.galaxy13.web.server.application.properties.DBConnectionProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class Storage {
     private static final Logger logger = LoggerFactory.getLogger(Storage.class);
@@ -34,6 +37,7 @@ public class Storage {
                 dbProperties.getJdbcPassword());
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static <T> T objFromResultSet(Class<T> objClass, ResultSet rs) throws SQLException, ClassCastException{
         Field[] fields = objClass.getDeclaredFields();
         T obj;
@@ -66,10 +70,14 @@ public class Storage {
                 insert into items (uuid, title, price) values (?, ?, ?) returning uuid, title, price""";
     }
 
-    private static String createUpdateItemQuery(Map<String, String> params){
-        StringJoiner stringJoiner = new StringJoiner(",", "update items set ", "where item_id = ?");
-        params.forEach((key, value) -> stringJoiner.add(key + " = " + value));
-        return stringJoiner.toString();
+    private static String createUpdateItemQuery() {
+        return """
+                update items set title = ?, price = ? where uuid = ? returning uuid""";
+    }
+
+    private static String createDeleteItemQuery() {
+        return """
+                delete from items where uuid = ? returning *""";
     }
 
     public static List<Item> getItems() throws ClassNotFoundException, SQLException{
@@ -92,7 +100,7 @@ public class Storage {
         }
     }
 
-    public static Item getItem(UUID id) throws ClassNotFoundException, SQLException, ClassCastException {
+    public static Item getItem(UUID id) throws ClassNotFoundException, SQLException, ClassCastException, ItemNotExists {
         try(Connection connection = createConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(createGetItemQuery())) {
             preparedStatement.setObject(1, id);
@@ -108,7 +116,7 @@ public class Storage {
                     throw e;
                 }
             } else {
-                throw new SQLException(String.format("No element with id %s found", id));
+                throw new ItemNotExists();
             }
         }
     }
@@ -128,22 +136,34 @@ public class Storage {
             }
         }
     }
-//
-//    public static boolean contains(UUID uuid) {
-//        return items.containsKey(uuid);
-//    }
-//
-//    public static void modifyItem(UUID uuid, Item updateItem) {
-//        logger.trace(String.format("Item %s modification started", uuid));
-//        Item item = items.get(uuid);
-//        if (updateItem.getPrice() != null) {
-//            item.setPrice(updateItem.getPrice());
-//            logger.trace(String.format("Item %s price updated", uuid));
-//        }
-//        if (updateItem.getTitle() != null) {
-//            item.setTitle(updateItem.getTitle());
-//            logger.trace(String.format("Item %s title updated", uuid));
-//        }
-//        logger.trace(String.format("Item %s modification finished", uuid));
-//    }
+
+    public static void update(Item item) throws SQLException, ClassNotFoundException, ItemNotExists {
+        try (Connection connection = createConnection();
+             PreparedStatement statement = connection.prepareStatement(createUpdateItemQuery())) {
+            statement.setString(1, item.getTitle());
+            statement.setInt(2, item.getPrice());
+            statement.setObject(3, item.getUuid());
+            statement.executeQuery();
+        } catch (SQLException e) {
+            if (e.getSQLState().equals("23505")) {
+                logger.debug("Database throws exception 23505. Item not exists");
+                throw new ItemNotExists();
+            }
+            logger.warn("Unexpected SQL exception thrown by database", e);
+            throw e;
+        }
+    }
+
+    public static Item delete(UUID uuid) throws SQLException, ClassNotFoundException, ItemNotExists {
+        try (Connection connection = createConnection();
+             PreparedStatement statement = connection.prepareStatement(createDeleteItemQuery())) {
+            statement.setObject(1, uuid);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return objFromResultSet(Item.class, resultSet);
+            } else {
+                throw new ItemNotExists();
+            }
+        }
+    }
 }

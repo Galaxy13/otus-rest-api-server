@@ -1,45 +1,42 @@
 package com.otus.galaxy13.web.server.application.processors;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import com.otus.galaxy13.web.server.HttpRequest;
-import com.otus.galaxy13.web.server.application.Item;
 import com.otus.galaxy13.web.server.application.Storage;
-import com.otus.galaxy13.web.server.application.exceptions.HTTPError;
-import com.otus.galaxy13.web.server.application.responses.Response;
-
+import com.otus.galaxy13.web.server.application.ddo.Item;
+import com.otus.galaxy13.web.server.http.HTTPResponse;
+import com.otus.galaxy13.web.server.http.ddo.HTTPRequest;
+import com.otus.galaxy13.web.server.http.ddo.Response;
+import com.otus.galaxy13.web.server.http.exceptions.HTTPError;
 
 import java.sql.SQLException;
 
 public class CreateNewProductProcessor extends Processor {
     @Override
-    public Response execute(HttpRequest httpRequest) throws HTTPError {
+    public Response execute(HTTPRequest httpRequest) throws HTTPError {
         logger.trace("Execution of POST method to create new item");
-        Gson gson = new Gson();
         try {
-            Item item = gson.fromJson(httpRequest.getBody(), Item.class);
+            Item item = itemParser(httpRequest);
+            logger.trace("Existing parameters retrieved from JSON/query");
             if (item.getTitle() == null || item.getPrice() == null) {
                 logger.debug("Empty name/price passed with new item creation POST request");
-                throw new HTTPError(400, httpRequest.getUri(), "Bad Request", "Title and price are required fields for new item creation");
+                throw HTTPResponse.err400(httpRequest, "Title and price are required fields for new item creation");
             }
+            item.setUuid();
+            logger.trace("UUID set from path parameter");
             Item createdItem = Storage.save(item);
             logger.trace(String.format("New item %s created successfully", item.getTitle()));
-            String body;
-            if (httpRequest.getRequestType().equals("html")){
-                body = bodyHandlerHtml(httpRequest, createdItem, "createItemTemplate.html");
-            } else {
-                body = gson.toJson(createdItem);
-            }
-            return new Response(200, "OK", body);
+            String body = bodyHandler(httpRequest, createdItem, "createItemTemplate.html");
+            logger.trace("Response body created");
+            return HTTPResponse.ok(body);
         } catch (JsonSyntaxException e) {
-            logger.debug("Wrong parameters passed to create new item. " + e.getMessage());
-            throw new HTTPError(400, httpRequest.getUri(), "Bad Request", "Wrong parameters passed, cannot create new Item");
+            logger.debug("Wrong parameters passed to create new item. {}", e.getMessage());
+            throw HTTPResponse.err400(httpRequest, "Wrong parameters passed, cannot create new Item");
         } catch (SQLException e){
             logger.error("SQL exception occurred", e);
-            throw new HTTPError(500, httpRequest.getUri(), "Internal Error", "Internal Server Error");
+            throw HTTPResponse.err500(httpRequest, "Internal Server Error");
         } catch (ClassNotFoundException e){
             logger.error("JVM can't find JDBC driver", e);
-            throw new HTTPError(500, httpRequest.getUri(), "Internal Error", "Storage unavailable");
+            throw HTTPResponse.err500(httpRequest, "Storage unavailable");
         }
     }
 }

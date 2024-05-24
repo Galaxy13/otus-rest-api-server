@@ -1,4 +1,4 @@
-package com.otus.galaxy13.web.server.application.exceptions;
+package com.otus.galaxy13.web.server.html.exceptions;
 
 public class HTMLParseException extends Exception{
     public HTMLParseException(Exception e) {

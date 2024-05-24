@@ -6,7 +6,7 @@
 
     <groupId>com.otus.galaxy13.web.server</groupId>
     <artifactId>may-web-server</artifactId>
-    <version>0.1-alpha</version>
+    <version>1.0-release</version>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>

@@ -1,4 +1,4 @@
-package com.otus.galaxy13.web.server.application.exceptions;
+package com.otus.galaxy13.web.server.http.exceptions;
 
 public class HTTPError extends Throwable{
     int statusCode;

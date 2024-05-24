@@ -1,31 +1,21 @@
-package com.otus.galaxy13.web.server;
+package com.otus.galaxy13.web.server.http.routing;
 
 import com.otus.galaxy13.web.server.application.processors.Processor;
 import com.otus.galaxy13.web.server.application.processors.UknownOperationProcessor;
 
 public class RouterInstance {
     private final Processor pathProcessor;
-    private final String routeKey;
-    private String parameterName;
     private Processor parameterizedLevelPathProcessor;
 
-    public RouterInstance(String currentLevelPath){
+    public RouterInstance() {
         this.pathProcessor = new UknownOperationProcessor();
-        this.routeKey = currentLevelPath;
     }
 
-    public RouterInstance(String currentLevelPath, Processor pathProcessor) {
+    public RouterInstance(Processor pathProcessor) {
         this.pathProcessor = pathProcessor;
-        this.routeKey = currentLevelPath;
     }
 
-    public String getChildPath(String input) {
-        int indexOfLastSlash = input.lastIndexOf("/");
-        return input.substring(indexOfLastSlash);
-    }
-
-    public void addParametrizedProcessor(String parameterName, Processor pathProcessor){
-        this.parameterName = parameterName;
+    public void addParametrizedProcessor(Processor pathProcessor) {
         parameterizedLevelPathProcessor = pathProcessor;
     }
 

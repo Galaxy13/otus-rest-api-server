@@ -1,5 +1,6 @@
 package com.otus.galaxy13.web.server;
 
+import com.otus.galaxy13.web.server.http.HTTPServer;
 import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class Main {
 
     public static void main(String[] args) {
         int port = parsePortNumber(args);
-        new HttpServer(port).start();
+        new HTTPServer(port).start();
     }
 
     private static int parsePortNumber(String[] args) {
